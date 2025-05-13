@@ -1,0 +1,337 @@
+using System.Text;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Shapes;
+using LiveCharts;
+using LiveCharts.Wpf;
+using LiveCharts.Defaults;
+using System.Collections.ObjectModel;
+using Microsoft.Data.SqlClient;
+
+namespace WpfApp1
+{
+    public partial class MainWindow : Window
+    {
+        public ObservableCollection<ProductCostHistory> ProductCostHistories { get; set; }
+        public ObservableCollection<ScrapReason> ScrapReasons { get; set; }
+        public ObservableCollection<WorkOrder> WorkOrders { get; set; }
+        public decimal TotalStandardCost { get; set; }
+        public decimal TotalProducts { get; set; }
+        public ObservableCollection<ProductInventory> ProductInventories { get; set; }
+        public SeriesCollection InventorySeries { get; set; }
+        public SeriesCollection ReviewSeries { get; set; }
+        public string[] ProductLabels { get; set; }
+        public MainWindow()
+        {
+            InitializeComponent();
+            ProductCostHistories = new ObservableCollection<ProductCostHistory>();
+            ScrapReasons = new ObservableCollection<ScrapReason>();
+            WorkOrders = new ObservableCollection<WorkOrder>();
+            DataContext = this;
+            LoadData();
+            ScrapLoadData();
+            WorkOrderLoadData();
+            CalculateTotalStandardCost();
+            CalculateTotalProducts();
+            LoadInventoryData();
+            GenerateInventoryChart();
+            LoadReviewChartData();
+        }
+
+        private void LoadData()
+        {
+            try
+            {
+                string connectionString = "Data Source=DESKTOP-9CHSIPP;Initial Catalog=AdventureWorks2022;Integrated Security=True;Encrypt=False;Trust Server Certificate=True";
+
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    string query = "SELECT ProductID, StartDate, EndDate, StandardCost, ModifiedDate FROM Production.ProductCostHistory";
+                    SqlCommand command = new SqlCommand(query, connection);
+                    SqlDataReader reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        ProductCostHistories.Add(new ProductCostHistory
+                        {
+                            ProductID = reader.GetInt32(0),
+                            StartDate = reader.GetDateTime(1),
+                            EndDate = reader.IsDBNull(2) ? (DateTime?)null : reader.GetDateTime(2),
+                            StandardCost = reader.GetDecimal(3),
+                            ModifiedDate = reader.GetDateTime(4)
+                        });
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading data: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+        }
+
+        private void CalculateTotalStandardCost()
+        {
+            TotalStandardCost = ProductCostHistories.Sum(p => p.StandardCost);
+        }
+
+        private void CalculateTotalProducts()
+        {
+            TotalProducts = ProductCostHistories.Count;
+        }
+
+        // SCRAP REASON
+        private void ScrapLoadData()
+        {
+            try
+            {
+                string connectionString = "Data Source=DESKTOP-9CHSIPP;Initial Catalog=AdventureWorks2022;Integrated Security=True;Encrypt=False;Trust Server Certificate=True";
+
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    string query = "SELECT ScrapReasonID, Name, ModifiedDate FROM Production.ScrapReason";
+                    SqlCommand command = new SqlCommand(query, connection);
+                    SqlDataReader reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        ScrapReasons.Add(new ScrapReason
+                        {
+                            ScrapReasonID = reader.GetInt16(0),
+                            Name = reader.GetString(1),
+                            ModifiedDate = reader.GetDateTime(2)
+                        });
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading data: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+        }
+
+        private void WorkOrderLoadData()
+        {
+            try
+            {
+                string connectionString = "Data Source=DESKTOP-9CHSIPP;Initial Catalog=AdventureWorks2022;Integrated Security=True;Encrypt=False;Trust Server Certificate=True";
+
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    string query = "SELECT WorkOrderID, ProductID, OrderQty, StockedQty, ScrappedQty, StartDate, EndDate, DueDate, ModifiedDate FROM Production.WorkOrder";
+                    SqlCommand command = new SqlCommand(query, connection);
+                    SqlDataReader reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        WorkOrders.Add(new WorkOrder
+                        {
+                            WorkOrderID = reader.GetInt32(0),
+                            ProductID = reader.GetInt32(1),
+                            OrderQty = reader.GetInt32(2),
+                            StockedQty = reader.GetInt32(3),
+                            ScrappedQty = reader.GetInt16(4),
+                            StartDate = reader.GetDateTime(5),
+                            EndDate = reader.GetDateTime(6),
+                            DueDate = reader.GetDateTime(7),
+
+                            ModifiedDate = reader.GetDateTime(8)
+                        });
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading data: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+        }
+
+        private void LoadInventoryData()
+        {
+            ProductInventories = new ObservableCollection<ProductInventory>();
+
+            try
+            {
+                string connectionString = "Data Source=DESKTOP-9CHSIPP;Initial Catalog=AdventureWorks2022;Integrated Security=True;Encrypt=False;Trust Server Certificate=True";
+
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    string query = "SELECT ProductID, LocationID, Shelf, Bin, Quantity FROM Production.ProductInventory";
+                    SqlCommand command = new SqlCommand(query, connection);
+                    SqlDataReader reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        ProductInventories.Add(new ProductInventory
+                        {
+                            ProductID = reader.GetInt32(0),
+                            LocationID = reader.GetInt16(1),
+                            Shelf = reader.GetString(2),
+                            Bin = reader.GetByte(3),
+                            Quantity = reader.GetInt16(4)
+                        });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading inventory: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void GenerateInventoryChart()
+        {
+            var shelfGroups = ProductInventories
+                .Where(p => p.Shelf == "A" || p.Shelf == "B" || p.Shelf == "C")
+                .GroupBy(p => p.Shelf)
+                .ToDictionary(g => g.Key, g => g.Sum(p => p.Quantity));
+
+            InventorySeries = new SeriesCollection
+    {
+        new PieSeries
+        {
+            Title = "Shelf A",
+            Values = new ChartValues<int> { shelfGroups.ContainsKey("A") ? shelfGroups["A"] : 0 },
+            Fill = Brushes.Red,
+            DataLabels = true,
+            LabelPoint = chartPoint => $"{chartPoint.Y} ({chartPoint.Participation:P1})"
+        },
+        new PieSeries
+        {
+            Title = "Shelf B",
+            Values = new ChartValues<int> { shelfGroups.ContainsKey("B") ? shelfGroups["B"] : 0 },
+            Fill = Brushes.Blue,
+            DataLabels = true,
+            LabelPoint = chartPoint => $"{chartPoint.Y} ({chartPoint.Participation:P1})"
+        },
+        new PieSeries
+        {
+            Title = "Shelf C",
+            Values = new ChartValues<int> { shelfGroups.ContainsKey("C") ? shelfGroups["C"] : 0 },
+            Fill = Brushes.Green,
+            DataLabels = true,
+            LabelPoint = chartPoint => $"{chartPoint.Y} ({chartPoint.Participation:P1})"
+        }
+    };
+
+            DataContext = this;
+        }
+
+        private void LoadReviewChartData()
+        {
+            try
+            {
+                string connectionString = "Data Source=DESKTOP-9CHSIPP;Initial Catalog=AdventureWorks2022;Integrated Security=True;Encrypt=False;Trust Server Certificate=True";
+
+                var reviewData = new List<ProductReview>();
+
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    string query = "SELECT ProductID, Rating FROM Production.ProductReview";
+                    SqlCommand command = new SqlCommand(query, connection);
+                    SqlDataReader reader = command.ExecuteReader();
+
+                    while (reader.Read())
+                    {
+                        reviewData.Add(new ProductReview
+                        {
+                            ProductID = reader.GetInt32(0),
+                            Rating = reader.GetInt32(1)
+                        });
+                    }
+                }
+
+                // Átlagolás ProductID alapján
+                var averagedRatings = reviewData
+                    .GroupBy(r => r.ProductID)
+                    .Select(g => new
+                    {
+                        ProductID = g.Key,
+                        AverageRating = g.Average(r => r.Rating)
+                    })
+                    .OrderBy(x => x.ProductID)
+                    .ToList();
+
+                ReviewSeries = new SeriesCollection
+        {
+            new RowSeries
+            {
+                Title = "Átlagos értékelés",
+                Values = new ChartValues<double>(averagedRatings.Select(x => x.AverageRating)),
+                DataLabels = true
+            }
+        };
+
+                ProductLabels = averagedRatings.Select(x => $"ID {x.ProductID}").ToArray();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading review data: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+
+    }
+    // Adatok --------------------------------------------------------------------- //
+    public class ProductCostHistory
+    {
+        public int ProductID { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public decimal StandardCost { get; set; }
+        public DateTime ModifiedDate { get; set; }
+    }
+
+    public class ScrapReason
+    {
+        public int ScrapReasonID { get; set; }
+        public string Name { get; set; }
+        public DateTime ModifiedDate { get; set; }
+    }
+
+    public class WorkOrder
+    {
+        public int WorkOrderID { get; set; }
+        public int ProductID { get; set; }
+        public int OrderQty { get; set; }
+        public int StockedQty { get; set; }
+        public int ScrappedQty { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public DateTime DueDate { get; set; }
+
+        public DateTime ModifiedDate { get; set; }
+    }
+
+    public class ProductInventory
+    {
+        public int ProductID { get; set; }
+        public int LocationID { get; set; }
+        public string Shelf { get; set; }
+        public int Bin { get; set; }
+        public int Quantity { get; set; }
+    }
+
+    public class ProductReview
+    {
+        public int ProductID { get; set; }
+        public int Rating { get; set; }
+    }
+
+}
