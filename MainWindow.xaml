@@ -1,0 +1,190 @@
+﻿<Window x:Class="WpfApp1.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:lvc="clr-namespace:LiveCharts.Wpf;assembly=LiveCharts.Wpf"
+        xmlns:financial="clr-namespace:WpfApp1"
+        xmlns:local="clr-namespace:WpfApp1"
+        mc:Ignorable="d"
+        Title="Dashboard app" Height="900" Width="1200">
+    <Grid RenderTransformOrigin="0.501,0.494">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <!-- Kártya 1 -->
+        <Border Grid.Row="0" Grid.Column="0"
+        Margin="0,10,10,10"
+        Background="#FFF5F5F5"
+        BorderBrush="#FFD3D3D3"
+        BorderThickness="2"
+        CornerRadius="10"
+        Padding="10">
+            <DataGrid ItemsSource="{Binding ProductCostHistories}"
+              AutoGenerateColumns="False"
+              IsReadOnly="True"
+              HeadersVisibility="Column"
+              GridLinesVisibility="None"
+              Background="White"
+              RowBackground="#FFFFFFFF"
+              AlternatingRowBackground="#FFF9F9F9"
+              BorderThickness="0"
+              
+              ColumnHeaderHeight="40"
+              RowHeight="35"
+              FontSize="14"
+              FontFamily="Segoe UI"
+              Foreground="#333333" Margin="0,0,-12,0"
+              >
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Product ID" Binding="{Binding ProductID}" Width="100" />
+                    <DataGridTextColumn Header="Start Date" Binding="{Binding StartDate, StringFormat=yyyy-MM-dd}" Width="150" />
+                    <DataGridTextColumn Header="End Date" Binding="{Binding EndDate, StringFormat=yyyy-MM-dd}" Width="150" />
+                    <DataGridTextColumn Header="Standard Cost" Binding="{Binding StandardCost, StringFormat=F2}" Width="150" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+        <!-- Kártya 2 -->
+        <Border Grid.Row="0" Grid.Column="1"
+            Margin="0,165,0,0"
+            Background="#FFF5F5F5"
+            BorderBrush="#FFD3D3D3"
+            BorderThickness="2"
+            CornerRadius="10"
+            Padding="20"
+            VerticalAlignment="Top"
+            HorizontalAlignment="Center">
+            <TextBlock Grid.Row="0" Grid.Column="1" Margin="10,10,10,10" FontSize="24" FontWeight="Bold">
+            <Run Text="Total Standard Cost: "/>
+            <Run Text="{Binding TotalStandardCost, StringFormat=F2}"/>
+            <Run Text=" $"/>
+            </TextBlock>
+        </Border>
+        <Border Grid.Row="0" Grid.Column="1"
+                Margin="0,41,0,0"
+                Background="#FFF5F5F5"
+                BorderBrush="#FFD3D3D3"
+                BorderThickness="2"
+                CornerRadius="10"
+                Padding="20"
+                VerticalAlignment="Top"
+                HorizontalAlignment="Center">
+            <TextBlock Grid.Row="0" Grid.Column="1" Margin="10,10,10,10" FontSize="24" FontWeight="Bold">
+                <Run Text="Total Number of Products: "/>
+                <Run Text="{Binding TotalProducts, StringFormat=F2}"/>
+            </TextBlock>
+        </Border>
+
+        <!-- 2.sor / 1-->
+        <Border Grid.Row="1" Grid.Column="0"
+                Margin="89,9,99,10"
+                Background="#FFF5F5F5"
+                BorderBrush="#FFD3D3D3"
+                BorderThickness="2"
+                CornerRadius="10"
+                Padding="10">
+            <DataGrid ItemsSource="{Binding ScrapReasons}"
+              AutoGenerateColumns="False"
+              IsReadOnly="True"
+              HeadersVisibility="Column"
+              GridLinesVisibility="None"
+              Background="White"
+              RowBackground="#FFFFFFFF"
+              AlternatingRowBackground="#FFF9F9F9"
+              BorderThickness="0"
+      
+              ColumnHeaderHeight="40"
+              RowHeight="35"
+              FontSize="14"
+              FontFamily="Segoe UI"
+              Foreground="#333333" Margin="0,0,-12,0"
+      >
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="ScrapReasonID" Binding="{Binding ScrapReasonID}" Width="120" />
+                    <DataGridTextColumn Header="Issue" Binding="{Binding Name, StringFormat=F2}" Width="220" />
+
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+        <!-- 3.sor / 1 -->
+        <Border Grid.Row="2" Grid.Column="0"
+          Margin="67,10,77,10"
+          Background="#FFF5F5F5"
+          BorderBrush="#FFD3D3D3"
+          BorderThickness="2"
+          CornerRadius="10"
+          Padding="10">
+            <DataGrid ItemsSource="{Binding WorkOrders}"
+                AutoGenerateColumns="False"
+                IsReadOnly="True"
+                HeadersVisibility="Column"
+                GridLinesVisibility="None"
+                Background="White"
+                RowBackground="#FFFFFFFF"
+                AlternatingRowBackground="#FFF9F9F9"
+                BorderThickness="0"
+
+                ColumnHeaderHeight="40"
+                RowHeight="35"
+                FontSize="14"
+                FontFamily="Segoe UI"
+                Foreground="#333333" Margin="0,0,-25,0"
+>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="ProductID" Binding="{Binding ProductID}" Width="80" />
+                    <DataGridTextColumn Header="OrderQuantity" Binding="{Binding OrderQty}" Width="100" />
+                    <DataGridTextColumn Header="StockedQuantity" Binding="{Binding StockedQty}" Width="120" />
+                    <DataGridTextColumn Header="ScrappedQuantity" Binding="{Binding ScrappedQty}" Width="120" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+
+        <Border Grid.Column="1"
+        Margin="112,278,0,0"
+        Background="#FFF5F5F5"
+        BorderBrush="#FFD3D3D3"
+        BorderThickness="2"
+        CornerRadius="10"
+        Padding="10"
+        VerticalAlignment="Top"
+        HorizontalAlignment="Left" Height="301" Grid.RowSpan="2">
+            <lvc:PieChart Series="{Binding InventorySeries}"
+                  Width="300"
+                  LegendLocation="Right"
+                  DataTooltip="{x:Null}" Margin="0,0,0,-12"/>
+        </Border>
+
+        <Border Grid.Row="2" Grid.Column="1"
+        Margin="10"
+        Background="#FFF5F5F5"
+        BorderBrush="#FFD3D3D3"
+        BorderThickness="2"
+        CornerRadius="10"
+        Padding="10"
+        VerticalAlignment="Top"
+        HorizontalAlignment="Left"
+        Height="300"
+        Width="500">
+            <lvc:CartesianChart Series="{Binding ReviewSeries}" LegendLocation="Top">
+                <lvc:CartesianChart.AxisY>
+                    <lvc:Axis Labels="{Binding ProductLabels}" Title="ProductID" />
+                </lvc:CartesianChart.AxisY>
+                <lvc:CartesianChart.AxisX>
+                    <lvc:Axis Title="Átlagos Értékelés" MinValue="0" MaxValue="5"/>
+                </lvc:CartesianChart.AxisX>
+            </lvc:CartesianChart>
+        </Border>
+
+    </Grid>
+</Window>
